@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email 4 Assessment</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Assess Email 4</h2>
+    <div class="email-container">
+      <div class="email-header">
+        <p><strong>From:</strong> online-banking@lasallebank.com</p>
+        <p><strong>Subject:</strong> ATM cards attention. conformation code? yftue fvkg ts r</p>
+        <p><strong>Date:</strong> Wed, 15 Jun 2005 17:36:17 GMT</p>
+      </div>
+      <div class="email-body">
+        <p>Dear LaSalle Member,</p>
+        <p>As part of our continuing commitment to protect your account and …</p>
+        <p>You are requested to visit our site and fill in the required information:<br>
+           <a href="https://www.lasallebank-online.com/">https://www.lasallebank-online.com/</a></p>
+        <p>You have 3 days to enter required information or your credit card will be locked.</p>
+        <p>Sincerely,<br>LaSalle Online Banking Customer Service</p>
+        <p>Do not reply to this e-mail.</p>
+      </div>
+    </div>
+    <form id="email4AssessmentForm" class="form-container">
+      <label for="authenticityScale4">
+        This is a phishing e-mail. Rate how human-written (1) vs AI-generated (10):
+      </label>
+      <input type="range" id="authenticityScale4" min="1" max="10" value="5">
+      <span id="scaleValue4">5</span>
+
+      <fieldset>
+        <legend>What made you feel this way? (select all)</legend>
+        <label><input type="checkbox" name="reasons4" value="tone"> Tone / approach</label>
+        <label><input type="checkbox" name="reasons4" value="urls"> URLs</label>
+        <label><input type="checkbox" name="reasons4" value="grammar"> Grammar / spelling</label>
+        <label><input type="checkbox" name="reasons4" value="other"> Other</label>
+      </fieldset>
+
+      <label for="remarks4">Any other remarks:</label>
+      <textarea id="remarks4" rows="4" placeholder="Your comments…"></textarea>
+
+      <button type="submit">Finish</button>
+    </form>
+  </div>
+
+  <script>
+    const s4 = document.getElementById('authenticityScale4');
+    const v4 = document.getElementById('scaleValue4');
+    s4.addEventListener('input', () => (v4.textContent = s4.value));
+
+    document.getElementById('email4AssessmentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const reasons = Array.from(
+        e.target.querySelectorAll('input[name="reasons4"]:checked')
+      ).map(cb => cb.value);
+
+      const payload = {
+        email_number:       4,
+        authenticity_score: Number(s4.value),
+        reasons,
+        remarks:            document.getElementById('remarks4').value.trim() || null
+      };
+
+      try {
+        const resp = await fetch('/api/email_assessment', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+        if (!resp.ok) throw new Error(await resp.text());
+        window.location.href = 'thankyou.html';
+      } catch (err) {
+        console.error('Failed to submit assessment:', err);
+        alert('There was an error submitting your response. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email 1 Assessment</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Assess Email 1</h2>
+    <div class="email-container">
+      <div class="email-header">
+        <p><strong>From:</strong> "Security Team" &lt;security@trustedbank.com&gt;</p>
+        <p><strong>Subject:</strong> Urgent: Immediate Action Required on Your Account</p>
+        <p><strong>Date:</strong> Mon, 02 Oct 2023 12:18:39 +0000</p>
+      </div>
+      <div class="email-body">
+        <h3 style="color:red">Urgent: Immediate Action Required on Your Account</h3>
+        <p>Dear User,</p>
+        <p>We have detected <strong>unusual activity</strong> on your account. …</p>
+        <p>Please visit the <a href="http://secure-login.support.bank-verification.com/signin">secure verification page</a> to confirm your details.</p>
+        <div class="button-wrapper">
+          <a href="http://secure-login.support.bank-verification.com/signin" class="btn-link">Verify Now</a>
+        </div>
+        <p>Thank you,<br>Security Team</p>
+      </div>
+    </div>
+    <form id="emailAssessmentForm" class="form-container">
+      <label for="authenticityScale">This is a phishing e-mail. Rate how human-written (1) vs AI-generated (10):</label>
+      <input type="range" id="authenticityScale" min="1" max="10" value="5" />
+      <span id="scaleValue">5</span>
+
+      <fieldset>
+        <legend>What made you feel this way? (select all)</legend>
+        <label><input type="checkbox" name="reasons" value="tone"> Tone / approach</label>
+        <label><input type="checkbox" name="reasons" value="urls"> URLs</label>
+        <label><input type="checkbox" name="reasons" value="grammar"> Grammar / spelling</label>
+        <label><input type="checkbox" name="reasons" value="other"> Other</label>
+      </fieldset>
+
+      <label for="remarks">Any other remarks:</label>
+      <textarea id="remarks" rows="4" placeholder="Your comments…"></textarea>
+
+      <button type="submit">Next</button>
+    </form>
+  </div>
+
+  <script>
+    const slider = document.getElementById('authenticityScale');
+    const out    = document.getElementById('scaleValue');
+    slider.addEventListener('input', () => (out.textContent = slider.value));
+
+    document.getElementById('emailAssessmentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const reasons = Array.from(
+        e.target.querySelectorAll('input[name="reasons"]:checked')
+      ).map(cb => cb.value);
+
+      const payload = {
+        email_number:       1,
+        authenticity_score: Number(slider.value),
+        reasons,
+        remarks:            document.getElementById('remarks').value.trim() || null
+      };
+
+      try {
+        const resp = await fetch('/api/email_assessment', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+
+        if (!resp.ok) throw new Error(await resp.text());
+        window.location.href = 'email2.html';
+      } catch (err) {
+        console.error('Failed to submit assessment:', err);
+        alert('There was an error submitting your response. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

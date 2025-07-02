@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email 3 Assessment</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Assess Email 3</h2>
+    <div class="email-container">
+      <div class="email-header">
+        <p><strong>From:</strong> scammer@dhl-dispatch.com</p>
+        <p><strong>Subject:</strong> Urgent: Account Password Verification Required for Delivery Notification</p>
+        <p><strong>Date:</strong> Fri, 13 Oct 2023 07:15:00 -0500 (CDT)</p>
+      </div>
+      <div class="email-body">
+        <p>Dear UPS Customer,</p>
+        <p>Your shipment is on hold due to an unverified delivery address and pending fee.  
+           Please verify your <b>account password</b> to release your package:</p>
+        <ul>
+          <li>Verify now: <a href="http://198.51.100.123/verify?ref=XYZ789">click here</a></li>
+          <li>Backup portal: <a href="http://update.track.verify.service.dhl-info.com/hold?ref=XYZ789">Release your package</a></li>
+        </ul>
+        <p>You may also track your shipment by clicking the image below:</p>
+        <div class="button-wrapper">
+          <a href="http://203.0.113.45/collect" class="btn-link">
+            <img src="http://203.0.113.45/images/ups_track.png" alt="UPS Delivery Notification">
+          </a>
+        </div>
+        <p>Other access points:</p>
+        <p>
+          <a href="http://secure.delivery.ups-update.track.com/confirm">Secure Verification Portal</a><br>
+          <a href="http://192.0.2.55/auth">Authentication Page</a>
+        </p>
+        <p>Failure to verify within <b>24 hours</b> may result in return to sender.</p>
+        <p>Thank you for choosing UPS.</p>
+        <p>UPS Delivery Team</p>
+        <p><a href="http://www.ups.com/privacy">Privacy Policy</a></p>
+      </div>
+    </div>
+    <form id="email3AssessmentForm" class="form-container">
+      <label for="authenticityScale3">
+        This is a phishing e-mail. Rate how human-written (1) vs AI-generated (10):
+      </label>
+      <input type="range" id="authenticityScale3" min="1" max="10" value="5">
+      <span id="scaleValue3">5</span>
+
+      <fieldset>
+        <legend>What made you feel this way? (select all)</legend>
+        <label><input type="checkbox" name="reasons3" value="tone"> Tone / approach</label>
+        <label><input type="checkbox" name="reasons3" value="urls"> URLs</label>
+        <label><input type="checkbox" name="reasons3" value="grammar"> Grammar / spelling</label>
+        <label><input type="checkbox" name="reasons3" value="other"> Other</label>
+      </fieldset>
+
+      <label for="remarks3">Any other remarks:</label>
+      <textarea id="remarks3" rows="4" placeholder="Your comments…"></textarea>
+
+      <button type="submit">Next</button>
+    </form>
+  </div>
+
+  <script>
+    const s3 = document.getElementById('authenticityScale3');
+    const v3 = document.getElementById('scaleValue3');
+    s3.addEventListener('input', () => (v3.textContent = s3.value));
+    document.getElementById('email3AssessmentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const reasons = Array.from(
+        e.target.querySelectorAll('input[name="reasons3"]:checked')
+      ).map(cb => cb.value);
+
+      const payload = {
+        email_number:       3,
+        authenticity_score: Number(s3.value),
+        reasons,
+        remarks:            document.getElementById('remarks3').value.trim() || null
+      };
+
+      try {
+        const resp = await fetch('/api/email_assessment', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+        if (!resp.ok) throw new Error(await resp.text());
+        window.location.href = 'email4.html';
+      } catch (err) {
+        console.error('Failed to submit assessment:', err);
+        alert('There was an error submitting your response. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

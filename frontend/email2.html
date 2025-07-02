@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email 2 Assessment</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Assess Email 2</h2>
+    <div class="email-container">
+      <div class="email-header">
+        <p><strong>From:</strong> exchange-robot@paypal.com</p>
+        <p><strong>Subject:</strong> Confirmation</p>
+        <p><strong>Date:</strong> Mon, 29 Nov 2004 00:58:42 +0900</p>
+      </div>
+      <div class="email-body" style="background:#ffffcc">
+        <p><i>Congratulations! PayPal has successfully charged $175 …</i></p>
+        <p><i>To see details please click this <a href="http://169.254.236.44:1639/index.htm"><b>link</b></a>.</i></p>
+      </div>
+    </div>
+    <form id="email2AssessmentForm" class="form-container">
+      <label for="authenticityScale2">This is a phishing e-mail. Rate how human-written (1) vs AI-generated (10):</label>
+      <input type="range" id="authenticityScale2" min="1" max="10" value="5" />
+      <span id="scaleValue2">5</span>
+
+      <fieldset>
+        <legend>What made you feel this way? (select all)</legend>
+        <label><input type="checkbox" name="reasons2" value="tone"> Tone / approach</label>
+        <label><input type="checkbox" name="reasons2" value="urls"> URLs</label>
+        <label><input type="checkbox" name="reasons2" value="grammar"> Grammar / spelling</label>
+        <label><input type="checkbox" name="reasons2" value="other"> Other</label>
+      </fieldset>
+
+      <label for="remarks2">Any other remarks:</label>
+      <textarea id="remarks2" rows="4" placeholder="Your comments…"></textarea>
+
+      <button type="submit">Next</button>
+    </form>
+  </div>
+
+  <script>
+    const slider2 = document.getElementById('authenticityScale2');
+    const out2    = document.getElementById('scaleValue2');
+    slider2.addEventListener('input', () => (out2.textContent = slider2.value));
+
+    document.getElementById('email2AssessmentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const reasons = Array.from(
+        e.target.querySelectorAll('input[name="reasons2"]:checked')
+      ).map(cb => cb.value);
+
+      const payload = {
+        email_number:       2,
+        authenticity_score: Number(slider2.value),
+        reasons,
+        remarks:            document.getElementById('remarks2').value.trim() || null
+      };
+
+      try {
+        const resp = await fetch('/api/email_assessment', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+
+        if (!resp.ok) throw new Error(await resp.text());
+        window.location.href = 'email3.html';
+      } catch (err) {
+        console.error('Failed to submit assessment:', err);
+        alert('There was an error submitting your response. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

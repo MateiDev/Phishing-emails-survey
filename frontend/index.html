@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey Introduction</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="intro-bg">
+  <div class="intro-card">
+    <h1 class="intro-title">Welcome to the Survey</h1>
+
+    <p class="intro-text">
+      Thank you for helping with my bachelor thesis!<br />
+      Your answers are <strong>completely anonymous</strong>.
+    </p>
+
+    <div class="intro-step-list">
+      <p>How it works:</p>
+      <ol>
+        <li>You’ll read <strong>4 e-mails</strong> one by one.</li>
+        <li>After each message you’ll rate its authenticity and note what tipped you off.</li>
+        <li>The whole survey takes <strong>&lt; 5 minutes</strong>.</li>
+      </ol>
+    </div>
+
+    <p class="intro-text">
+      Participation is voluntary and the data will be used <em>only</em> for research purposes.
+    </p>
+
+    <button id="startBtn" class="intro-btn">Start Survey</button>
+  </div>
+
+  <script>
+    document
+      .getElementById("startBtn")
+      .addEventListener("click", () => (location.href = "survey.html"));
+  </script>
+</body>
+</html>

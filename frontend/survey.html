@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Information</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="container form-container">
+    <h2>User Information</h2>
+
+    <form id="userInfoForm">
+      <label for="ageGroup">Age Group</label>
+      <select id="ageGroup" name="ageGroup" required>
+        <option value="">-- Select Age Group --</option>
+        <option value="18-24">18-24</option>
+        <option value="25-34">25-34</option>
+        <option value="35-44">35-44</option>
+        <option value="45-54">45-54</option>
+        <option value="55+">55+</option>
+      </select>
+
+      <label>Gender</label>
+      <div class="radio-group">
+        <label><input type="radio" name="gender" value="male" required /> Male</label>
+        <label><input type="radio" name="gender" value="female" /> Female</label>
+        <label><input type="radio" name="gender" value="other" /> Other</label>
+        <label><input type="radio" name="gender" value="prefer_not_say" /> Prefer not to say</label>
+      </div>
+
+      <label for="englishProficiency">English Proficiency (1-10)</label>
+      <input type="range" id="englishProficiency" name="englishProficiency" min="1" max="10" value="5" />
+      <span id="proficiencyValue">5</span>
+
+      <label for="currentRole">Current Role</label>
+      <select id="currentRole" name="currentRole" required>
+        <option value="">-- Select Role --</option>
+        <option value="student">Student</option>
+        <option value="employee">Employee</option>
+        <option value="both">Both</option>
+        <option value="other">Other</option>
+        <option value="prefer_not_say">Prefer not to say</option>
+      </select>
+
+      <button type="submit">Next</button>
+    </form>
+  </div>
+
+  <script>
+    const slider = document.getElementById('englishProficiency');
+    const out    = document.getElementById('proficiencyValue');
+    slider.addEventListener('input', () => (out.textContent = slider.value));
+
+    document.getElementById('userInfoForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const f = e.target;
+      const payload = {
+        age_group:           f.ageGroup.value,
+        gender:              f.gender.value,
+        english_proficiency: Number(f.englishProficiency.value),
+        current_role:        f.currentRole.value
+      };
+
+      try {
+        const resp = await fetch('/api/user_info', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+
+        if (!resp.ok) throw new Error(await resp.text());
+        window.location.href = 'email1.html';
+      } catch (err) {
+        console.error('Failed to submit user info:', err);
+        alert('There was an error submitting your info. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
