@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Survey Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    body{font-family:system-ui,sans-serif;margin:2rem;background:#f9fafb;color:#111}
+    h1{text-align:center;margin-bottom:1.5rem}
+    .grid{display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+    .card{background:#fff;padding:1.25rem 1.5rem;border-radius:1rem;box-shadow:0 5px 15px rgba(0,0,0,.05)}
+    .card h3{margin:.2rem 0 .9rem;font-size:1.05rem;text-align:center}
+    .card button{margin-top:.6rem;background:#3b82f6;color:#fff;border:none;padding:.4rem .9rem;border-radius:.5rem;cursor:pointer;width:100%}
+    .card button:hover{background:#2563eb}
+    canvas{width:100%!important;height:auto!important;margin-bottom:.75rem}
+    .modal{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:999}
+    .modal.active{display:flex}
+    .modal-box{background:#fff;max-width:600px;width:90%;padding:1.5rem 2rem;border-radius:1rem;max-height:80vh;overflow:auto}
+    .modal-box h2{margin-top:0}
+    .modal-box ul{padding-left:1.25rem}
+    .close-btn{float:right;font-size:1.3rem;cursor:pointer;border:none;background:none;color:#666}
+  </style>
+</head>
+<body>
+  <h1>Live Survey Results</h1>
+
+  <div class="grid">
+    {% set demoTitles = ["Age Groups","Gender","Current Role"] %}
+    {% for id,title in [("ageChart",demoTitles[0]),("genderChart",demoTitles[1]),("roleChart",demoTitles[2])] %}
+      <div class="card">
+        <h3>{{ title }}</h3>
+        <canvas id="{{ id }}"></canvas>
+      </div>
+    {% endfor %}
+
+    {% for n in range(1, emails|length + 1) %}
+      <div class="card">
+        <h3>Email {{n}} &mdash; Reasons</h3>
+        <canvas id="reasons{{n}}Chart"></canvas>
+
+        <h3>Email {{n}} &mdash; Human / AI Score</h3>
+        <canvas id="score{{n}}Chart"></canvas>
+
+        <button data-email="{{n}}">View remarks ({{ remarks_json[n]|length }})</button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2 id="modalTitle"></h2>
+      <ul id="modalList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const demoData    = {{ demo_json   | tojson }};
+    const reasonsData = {{ reasons_json| tojson }};
+    const remarksData = {{ remarks_json| tojson }};
+    const scoresData  = {{ scores_json | tojson }};
+
+    const piePalette  = ["#3b82f6","#ec4899","#fb923c","#10b981","#f59e0b",
+                         "#6366f1","#14b8a6","#ef4444","#8b5cf6","#f43f5e"];
+    const barColor    = "#0ea5e9";
+
+    const labels10 = [...Array(10).keys()].map(i=>String(i+1));
+
+    function doughnut(id, labels, counts){
+      new Chart(document.getElementById(id),{
+        type:"doughnut",
+        data:{labels,datasets:[{data:counts,backgroundColor:piePalette}]},
+        options:{plugins:{legend:{position:"bottom"}},cutout:"45%"}
+      });
+    }
+
+    function bar(id, counts){
+      new Chart(document.getElementById(id),{
+        type:"bar",
+        data:{labels:labels10,datasets:[{data:counts,backgroundColor:barColor}]},
+        options:{
+          plugins:{legend:{display:false}},
+          scales:{y:{beginAtZero:true,ticks:{precision:0}}}
+        }
+      });
+    }
+
+    doughnut("ageChart",    Object.keys(demoData.age),    Object.values(demoData.age));
+    doughnut("genderChart", Object.keys(demoData.gender), Object.values(demoData.gender));
+    doughnut("roleChart",   Object.keys(demoData.role),   Object.values(demoData.role));
+
+    for(const email of Object.keys(reasonsData)){
+      doughnut(`reasons${email}Chart`,
+               Object.keys(reasonsData[email]),
+               Object.values(reasonsData[email]));
+
+      const scoreCounts = labels10.map(l => scoresData[email][parseInt(l)] || 0);
+      bar(`score${email}Chart`, scoreCounts);
+    }
+
+    const modal  = document.getElementById("modal");
+    const mTitle = document.getElementById("modalTitle");
+    const mList  = document.getElementById("modalList");
+    document.getElementById("closeModal").onclick = () => modal.classList.remove("active");
+
+    document.querySelectorAll("button[data-email]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const eNum = btn.dataset.email;
+        mTitle.textContent = `Remarks for Email ${eNum}`;
+        mList.innerHTML = "";
+        (remarksData[eNum]||[]).forEach(r=>{
+          const li=document.createElement("li"); li.textContent=r; mList.appendChild(li);
+        });
+        if(!remarksData[eNum]?.length){
+          mList.innerHTML ="<li><em>No remarks submitted yet.</em></li>";
+        }
+        modal.classList.add("active");
+      });
+    });
+    modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("active")});
+  </script>
+</body>
+</html>
